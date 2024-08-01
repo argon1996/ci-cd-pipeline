@@ -28,6 +28,10 @@ stages:
       displayName: 'Instalar dependencias'
 
     - script: |
+        dir
+      displayName: 'Listar archivos en el directorio'
+
+    - script: |
         "C:\Program Files\Git\bin\bash.exe" -c "./lint.sh"
       displayName: 'Ejecutar análisis de código estático con Git Bash'
 
