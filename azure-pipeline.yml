@@ -2,29 +2,21 @@ trigger:
 - main
 
 pool:
-  name: 'Default'
+  name: 'Default'  # Nombre del pool donde está tu agente autoalojado
 
 variables:
   imageRepository: 'edwardpinzon651/hello-world'
   containerRegistry: 'miregistro1996.azurecr.io'
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
-  azureSubscription: 'AzureServiceConnection'
+  azureSubscription: 'AzureServiceConnection'  # Nombre de tu conexión de servicio
   resourceGroup: 'miNuevoGrupoDeRecursos'
   aksCluster: 'miClusterAKS'
 
 stages:
-- stage: Checkout
+- stage: Build
   jobs:
-  - job: Checkout
-    steps:
-    - checkout: self
-      displayName: 'Clonar repositorio'
-
-- stage: Install
-  dependsOn: Checkout
-  jobs:
-  - job: Install
+  - job: Build
     steps:
     - task: UseNode@1
       inputs:
@@ -35,30 +27,16 @@ stages:
         npm install
       displayName: 'Instalar dependencias'
 
-- stage: LintCode
-  dependsOn: Install
-  jobs:
-  - job: LintCode
-    steps:
     - script: |
-        dir   # Listar permisos de archivos en Windows
-        npm run lint
+        chmod +x scripts/lint.sh
+        ./scripts/lint.sh
       displayName: 'Ejecutar análisis de código estático'
 
-- stage: TestCode
-  dependsOn: LintCode
-  jobs:
-  - job: TestCode
-    steps:
+    # Comentado para evitar errores mientras no hay pruebas unitarias configuradas
     - script: |
         npm test
       displayName: 'Ejecutar pruebas unitarias'
 
-- stage: BuildDocker
-  dependsOn: TestCode
-  jobs:
-  - job: BuildDocker
-    steps:
     - script: |
         docker build -t $(imageRepository):$(tag) -f $(dockerfilePath) .
         docker tag $(imageRepository):$(tag) $(containerRegistry)/$(imageRepository):$(tag)
@@ -74,7 +52,6 @@ stages:
       displayName: 'Enviar imagen Docker al registro'
 
 - stage: Deploy
-  dependsOn: BuildDocker
   jobs:
   - job: Deploy
     steps:
