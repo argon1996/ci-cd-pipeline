@@ -12,9 +12,6 @@ variables:
   azureSubscription: 'AzureServiceConnection'
   resourceGroup: 'miNuevoGrupoDeRecursos'
   aksCluster: 'miClusterAKS'
-  sonarQubeEndpoint: 'Sonarqube'  # Nombre de tu conexión de servicio a SonarQube
-  sonarQubeProjectKey: 'pruebaultima-key'  # Clave del proyecto en SonarQube
-  sonarQubeProjectName: 'pruebaultima'  # Nombre del proyecto en SonarQube
 
 stages:
 - stage: Checkout
@@ -56,31 +53,8 @@ stages:
         npm test
       displayName: 'Ejecutar pruebas unitarias'
 
-- stage: SonarQubeAnalysis
-  dependsOn: TestCode
-  jobs:
-  - job: SonarQubeAnalysis
-    steps:
-    - task: SonarQubePrepare@5
-      inputs:
-        SonarQube: '$(sonarQubeEndpoint)'
-        scannerMode: 'CLI'
-        configMode: 'manual'
-        cliProjectKey: '$(sonarQubeProjectKey)'
-        cliProjectName: '$(sonarQubeProjectName)'
-        cliSources: '.'
-      displayName: 'Preparar análisis de SonarQube'
-
-    - task: SonarQubeAnalyze@5
-      displayName: 'Ejecutar análisis de SonarQube'
-
-    - task: SonarQubePublish@5
-      inputs:
-        pollingTimeoutSec: '300'
-      displayName: 'Publicar resultados de SonarQube'
-
 - stage: BuildDocker
-  dependsOn: SonarQubeAnalysis
+  dependsOn: TestCode
   jobs:
   - job: BuildDocker
     steps:
