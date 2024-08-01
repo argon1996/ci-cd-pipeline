@@ -2,19 +2,27 @@ trigger:
 - main
 
 pool:
-  name: 'Default'  # Nombre del pool donde está tu agente autoalojado
+  name: 'Default'
 
 variables:
   imageRepository: 'edwardpinzon651/hello-world'
   containerRegistry: 'miregistro1996.azurecr.io'
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
-  azureSubscription: 'AzureServiceConnection'  # Nombre de tu conexión de servicio
+  azureSubscription: 'AzureServiceConnection'
   resourceGroup: 'miNuevoGrupoDeRecursos'
   aksCluster: 'miClusterAKS'
 
 stages:
-- stage: InstallDependencies
+- stage: Checkout
+  jobs:
+  - job: Checkout
+    steps:
+    - checkout: self
+      displayName: 'Clonar repositorio'
+
+- stage: Install
+  dependsOn: Checkout
   jobs:
   - job: Install
     steps:
@@ -27,8 +35,8 @@ stages:
         npm install
       displayName: 'Instalar dependencias'
 
-- stage: Lint
-  dependsOn: InstallDependencies
+- stage: LintCode
+  dependsOn: Install
   jobs:
   - job: LintCode
     steps:
@@ -36,8 +44,8 @@ stages:
         npm run lint
       displayName: 'Ejecutar análisis de código estático'
 
-- stage: Test
-  dependsOn: Lint
+- stage: TestCode
+  dependsOn: LintCode
   jobs:
   - job: TestCode
     steps:
@@ -45,8 +53,8 @@ stages:
         npm test
       displayName: 'Ejecutar pruebas unitarias'
 
-- stage: BuildDockerImage
-  dependsOn: Test
+- stage: BuildDocker
+  dependsOn: TestCode
   jobs:
   - job: BuildDocker
     steps:
@@ -65,7 +73,7 @@ stages:
       displayName: 'Enviar imagen Docker al registro'
 
 - stage: Deploy
-  dependsOn: BuildDockerImage
+  dependsOn: BuildDocker
   jobs:
   - job: Deploy
     steps:
