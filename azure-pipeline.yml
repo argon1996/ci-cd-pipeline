@@ -28,7 +28,6 @@ stages:
       displayName: 'Instalar dependencias'
 
     - script: |
-        chmod +x lint.sh
         ./lint.sh
       displayName: 'Ejecutar análisis de código estático'
 
