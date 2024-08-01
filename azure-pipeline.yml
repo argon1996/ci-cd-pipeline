@@ -29,7 +29,11 @@ stages:
 
     - script: |
         dir
-      displayName: 'Listar archivos en el directorio'
+      displayName: 'Listar archivos en el directorio de trabajo'
+
+    - script: |
+        "C:\Program Files\Git\bin\bash.exe" -c "ls -la"
+      displayName: 'Listar archivos usando Git Bash'
 
     - script: |
         "C:\Program Files\Git\bin\bash.exe" -c "./lint.sh"
