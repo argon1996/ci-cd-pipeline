@@ -28,8 +28,8 @@ stages:
       displayName: 'Instalar dependencias'
 
     - script: |
-        lint.sh
-      displayName: 'Ejecutar análisis de código estático'
+        "C:\Program Files\Git\bin\bash.exe" -c "./lint.sh"
+      displayName: 'Ejecutar análisis de código estático con Git Bash'
 
     # Comentado para evitar errores mientras no hay pruebas unitarias configuradas
     - script: |
