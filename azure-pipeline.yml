@@ -28,8 +28,8 @@ stages:
       displayName: 'Instalar dependencias'
 
     - script: |
-        chmod +x scripts/lint.sh
-        ./scripts/lint.sh
+        chmod +x lint.sh
+        ./lint.sh
       displayName: 'Ejecutar análisis de código estático'
 
     # Comentado para evitar errores mientras no hay pruebas unitarias configuradas
