@@ -30,7 +30,6 @@ stages:
       inputs:
         versionSpec: '14.x'
         checkLatest: true
-      displayName: 'Configurar Node.js'
 
     - script: |
         npm install
@@ -49,7 +48,6 @@ stages:
       inputs:
         command: 'login'
         containerRegistry: 'dockerRegistryConnection'
-      displayName: 'Iniciar sesión en Docker Registry'
 
     - script: |
         docker push $(containerRegistry)/$(imageRepository):$(tag)
