@@ -41,6 +41,7 @@ stages:
   - job: LintCode
     steps:
     - script: |
+        ls -l   # Listar permisos de archivos
         npm run lint
       displayName: 'Ejecutar análisis de código estático'
 
