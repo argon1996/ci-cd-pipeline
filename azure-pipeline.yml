@@ -2,14 +2,14 @@ trigger:
 - main
 
 pool:
-  name: 'Default'  # Nombre del pool donde está tu agente autoalojado
+  name: 'Default'
 
 variables:
   imageRepository: 'edwardpinzon651/hello-world'
   containerRegistry: 'miregistro1996.azurecr.io'
   dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
-  azureSubscription: 'AzureServiceConnection'  # Nombre de tu conexión de servicio
+  azureSubscription: 'AzureServiceConnection'
   resourceGroup: 'miNuevoGrupoDeRecursos'
   aksCluster: 'miClusterAKS'
 
@@ -21,40 +21,62 @@ stages:
     - checkout: self
       displayName: 'Clonar repositorio'
 
-- stage: Build
+- stage: SetupNode
   dependsOn: Checkout
   jobs:
-  - job: Build
+  - job: SetupNode
     steps:
     - task: UseNode@1
       inputs:
         versionSpec: '14.x'
         checkLatest: true
+      displayName: 'Configurar Node.js'
 
+- stage: InstallDependencies
+  dependsOn: SetupNode
+  jobs:
+  - job: InstallDependencies
+    steps:
     - script: |
         npm install
       displayName: 'Instalar dependencias'
 
+- stage: LintCode
+  dependsOn: InstallDependencies
+  jobs:
+  - job: LintCode
+    steps:
     - script: |
         npm run lint
       displayName: 'Ejecutar análisis de código estático'
 
+- stage: BuildDockerImage
+  dependsOn: LintCode
+  jobs:
+  - job: BuildDockerImage
+    steps:
     - script: |
         docker build -t $(imageRepository):$(tag) -f $(dockerfilePath) .
         docker tag $(imageRepository):$(tag) $(containerRegistry)/$(imageRepository):$(tag)
       displayName: 'Construir imagen Docker'
 
+- stage: PushDockerImage
+  dependsOn: BuildDockerImage
+  jobs:
+  - job: PushDockerImage
+    steps:
     - task: Docker@2
       inputs:
         command: 'login'
         containerRegistry: 'dockerRegistryConnection'
+      displayName: 'Iniciar sesión en el registro de Docker'
 
     - script: |
         docker push $(containerRegistry)/$(imageRepository):$(tag)
       displayName: 'Enviar imagen Docker al registro'
 
 - stage: Deploy
-  dependsOn: Build
+  dependsOn: PushDockerImage
   jobs:
   - job: Deploy
     steps:
